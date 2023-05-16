@@ -46,9 +46,9 @@ class TransformerLite(nn.Module):
         self.layernorm = nn.LayerNorm([t, k])
         self.position_embedding = nn.Embedding(t, k)
         self.seq = nn.Sequential(
-            nn.Linear(t, 4, bias=True),
-            # nn.ReLU(),
-            # nn.Linear(100,4)
+            nn.Linear(t*k, 100, bias=True),
+            nn.ReLU(),
+            nn.Linear(100,4)
         )
 
     def forward(self,x):
@@ -59,8 +59,8 @@ class TransformerLite(nn.Module):
         y = self.attentionlayer(x)
         x = x + y
         x = self.layernorm(x)
-        y = self.seq(x.transpose(1,2))
-        y = F.softmax(y, dim=2) #(b,k,4)
+        y = self.seq(x.transpose(1,2).reshape(-1,t*k))
+        y = F.softmax(y, dim=1) #(b,k,4)
         return y
 # model = TransformerLite(10,1,2)
 # input = torch.rand(10,10,1)

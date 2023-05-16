@@ -9,7 +9,7 @@ import torch.nn as nn
 
 from transformerLite import TransformerLite
 
-SEQUANCE_LEN = 15000
+SEQUANCE_LEN = 10000
 
 
 def main(config):
@@ -32,8 +32,9 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         # inp = batch.data  # pcm file bytes(mini batch size(10),t=4096,k=1)
         # label = batch.label  # (batchsize,4) four coded corresponding to 4 places
         # ############################
-        inp = torch.rand(2,SEQUANCE_LEN,1).to('cuda:0')
-        label = torch.rand(2,4).to("cuda:0")
+        inp = torch.ones(2,SEQUANCE_LEN,2).to('cuda:0')
+        #label = torch.rand(2,4).to("cuda:0")
+        label = torch.Tensor([[0,1,0,0],[0,1,0,0]]).to('cuda:0')
         if inp.size(1) > MAX_LENGTH:
             inp = inp[:, :MAX_LENGTH, :]
         output = model(inp)  # output(batchsize,k=1,4)
@@ -55,11 +56,11 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         predicted = torch.argmax(output, dim=1)
         total += inp.size(0)
         correct += (predicted == torch.argmax(label, dim=1)).sum().item()
-
+        print(100 * correct / total)
     return avg_loss / len(train_iter), 100 * correct / total
 
 
-def run(epochs=10, k=1, heads=1, t=SEQUANCE_LEN, BATCH_SIZE=2):
+def run(epochs=10, k=2, heads=2, t=SEQUANCE_LEN, BATCH_SIZE=2):
     model = TransformerLite(t=t, k=k, heads=heads)
     model = model.to('cuda:0')
     # Create loss function and optimizer
