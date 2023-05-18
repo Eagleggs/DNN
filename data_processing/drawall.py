@@ -12,7 +12,7 @@ path1 = 'samples/recording_1684331402002_66.pcm'
 
 y = np.fromfile(path1, dtype=dt, sep='', offset=0)
 # cut signal
-y = y[10000:11000]
+y = y[9000:13000]
 cnt = len(y)
 
 # Time Domain

@@ -10,7 +10,7 @@ import torch.nn as nn
 from transformerLite import TransformerLite
 from get_data import PCMDataSet
 from torch.utils.data import Dataset, DataLoader
-SEQUANCE_LEN = 1000
+SEQUANCE_LEN =1000
 
 
 def main(config):
@@ -60,7 +60,7 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
     return avg_loss / len(train_iter), 100 * correct / total
 
 
-def run(epochs=150, k=2, heads=10, t=SEQUANCE_LEN, BATCH_SIZE=2):
+def run(epochs=150, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=10):
     model = TransformerLite(t=t, k=k, heads=heads)
     model = model.to('cuda:0')
     # Create loss function and optimizer
@@ -68,7 +68,7 @@ def run(epochs=150, k=2, heads=10, t=SEQUANCE_LEN, BATCH_SIZE=2):
     optimizer = optim.Adam(params=model.parameters(), lr=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
     dataset = PCMDataSet("./0517_data")
-    train_iter = DataLoader(dataset, batch_size=2, shuffle=True)
+    train_iter = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
     # train_data, test_data = dataloader.split(split_ratio=0.8)
 
     # Training loop
