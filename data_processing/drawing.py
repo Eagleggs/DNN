@@ -25,11 +25,11 @@ cnt = len(y)
 yf = fft(y)
 xf = fftfreq(cnt, 1 / sampleRates)[:cnt // 2]
 
-plt.semilogy(xf[1:cnt // 2], 2.0 / cnt * np.abs(yf[1:cnt // 2]), '-b')
-plt.title("FFT")
+
+
 # plt.semilogy(xf[1:cnt//2], 2.0/N * np.abs(ywf[1:cnt//2]), '-r')
 # plt.legend(['FFT', 'FFT w. window'])
-# powerSpectrum, freqenciesFound, time, imageAxis = plt.specgram(yf, Fs=63333)
+powerSpectrum, freqenciesFound, time, imageAxis = plt.specgram(yf, Fs=63333)
 plt.grid()
 plt.show()
 

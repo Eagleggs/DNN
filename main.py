@@ -8,7 +8,8 @@ import torch
 import torch.nn as nn
 
 from transformerLite import TransformerLite
-
+from get_data import PCMDataSet
+from torch.utils.data import Dataset, DataLoader
 SEQUANCE_LEN = 10000
 
 
@@ -26,17 +27,16 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
 
     # Iterate through batches
     for batch in tqdm(train_iter):
-
-        optimizer.zero_grad()
+        inp,label = batch
+        inp = inp.to('cuda:0')
+        label = label.to('cuda:0')
         # # TODO#############
         # inp = batch.data  # pcm file bytes(mini batch size(10),t=4096,k=1)
         # label = batch.label  # (batchsize,4) four coded corresponding to 4 places
         # ############################
-        inp = torch.ones(2,SEQUANCE_LEN,2).to('cuda:0')
-        #label = torch.rand(2,4).to("cuda:0")
-        label = torch.Tensor([[0,1,0,0],[0,1,0,0]]).to('cuda:0')
+        # inp = torch.ones(2,20000,2).to('cuda:0')
         if inp.size(1) > MAX_LENGTH:
-            inp = inp[:, :MAX_LENGTH, :]
+            inp = inp[:, 0:0+MAX_LENGTH,:]
         output = model(inp)  # output(batchsize,k=1,4)
         output = output.squeeze()  # output(batchsize,4)
         loss = criterion(output, label)
@@ -60,19 +60,16 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
     return avg_loss / len(train_iter), 100 * correct / total
 
 
-def run(epochs=10, k=2, heads=2, t=SEQUANCE_LEN, BATCH_SIZE=2):
+def run(epochs=100, k=2, heads=2, t=SEQUANCE_LEN, BATCH_SIZE=2):
     model = TransformerLite(t=t, k=k, heads=heads)
     model = model.to('cuda:0')
     # Create loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=model.parameters(), lr=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
-    # TODO#####################
-    # folder_path = "Desktop/SMS_data_sample"
-    # files_iterator = (os.path.join(folder_path, file_name) for file_name in os.listdir(folder_path) if
-    #                   os.path.isfile(os.path.join(folder_path, file_name)))
-    #######################
-    train_iter = range(0,10)
+    dataset = PCMDataSet("./0517_data")
+    train_iter = DataLoader(dataset, batch_size=2, shuffle=True)
+    # train_data, test_data = dataloader.split(split_ratio=0.8)
 
     # Training loop
     for epoch in range(epochs):
