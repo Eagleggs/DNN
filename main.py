@@ -25,11 +25,6 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         inp,label = batch
         inp = inp.to('cuda:0')
         label = label.to('cuda:0')
-        # # TODO#############
-        # inp = batch.data  # pcm file bytes(mini batch size(10),t=4096,k=1)
-        # label = batch.label  # (batchsize,4) four coded corresponding to 4 places
-        # ############################
-        # inp = torch.ones(2,20000,2).to('cuda:0')
         if inp.size(1) > MAX_LENGTH:
             inp = inp[:, 10000:10000+MAX_LENGTH,:]
         output = model(inp)  # output(batchsize,k=1,4)

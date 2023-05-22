@@ -62,10 +62,3 @@ class TransformerLite(nn.Module):
         y = self.seq(x.transpose(1,2).reshape(-1,t*k))
         y = F.softmax(y, dim=1) #(b,k,4)
         return y
-# model = TransformerLite(10,1,2)
-# input = torch.rand(10,10,1)
-# print(input.shape)
-# y = model(input)
-# y = y.squeeze()
-# print(y.shape)
-# print(y)
