@@ -6,15 +6,10 @@ from torch import optim
 from tqdm import tqdm
 import torch
 import torch.nn as nn
-
 from transformerLite import TransformerLite
 from get_data import PCMDataSet
 from torch.utils.data import Dataset, DataLoader
 SEQUANCE_LEN =1000
-
-
-def main(config):
-    device = torch.device('cuda:0')
 
 
 def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQUANCE_LEN, GRADIENT_CLIPPING=1.0):
@@ -84,6 +79,7 @@ def run(epochs=150, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=10):
         print(f'\nloss:{train_loss},acc:{train_acc}')
 
     print(f'\nFinished.loss:{train_loss},acc:{train_acc}')
+    torch.save(model,'model.pt')
 
 torch.cuda.empty_cache()
 run()
