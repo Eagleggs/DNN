@@ -5,14 +5,20 @@ from scipy.fft import fft, fftfreq
 import scipy.io.wavfile as wavfile
 import wave
 from scipy import signal
+
+from get_data import highpassfilter
+
 #	1.设定文件的格式为小端，16bit有符号整型，小端存储
 dt = np.dtype('<h')
 
-path1 = 'samples/recording_1684331402002_66.pcm'
+# path1 = 'samples/recording_1684330722347_13.pcm'
+path1 = 'samples/recording_1684942144064_8.pcm'
 
 y = np.fromfile(path1, dtype=dt, sep='', offset=0)
+hi = highpassfilter();
+y = hi.butter_highpass_filter(y, 18000, 63333)
 # cut signal
-y = y[9000:13000]
+y = y[8500:11000]
 cnt = len(y)
 
 # Time Domain

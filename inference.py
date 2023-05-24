@@ -27,7 +27,6 @@ def infer(MAX_LENGTH=1000):
     # Load the model (specify the map_location parameter to load on CPU)
     model = torch.load('model.pt', map_location=torch.device('cpu'))
 
-    # Move the model to the appropriate device (GPU if available)
     device = torch.device('cpu')
     model = model.to(device)
 
@@ -39,6 +38,6 @@ def infer(MAX_LENGTH=1000):
 
     # Perform the inference
     output = model(pcmfile)
-    print(f"The prediction of this room is: Room {torch.argmax(output)}")
+    print(f"The prediction of this room is: Room {(output)}")
 
 infer()

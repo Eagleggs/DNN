@@ -46,9 +46,11 @@ class TransformerLite(nn.Module):
         self.layernorm = nn.LayerNorm([t, k])
         self.position_embedding = nn.Embedding(t, k)
         self.seq = nn.Sequential(
-            nn.Linear(t*k, 100, bias=True),
+            nn.Linear(t*k, 1000, bias=True),
             nn.ReLU(),
-            nn.Linear(100,4)
+            nn.Linear(1000,500, bias=True),
+            nn.ReLU(),
+            nn.Linear(500,4)
         )
 
     def forward(self,x):
