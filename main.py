@@ -69,7 +69,7 @@ def test(test_iter, model,MAX_LENGTH=SEQUANCE_LEN):
         correct += (predicted == torch.argmax(label, dim=1)).sum().item()
     return 100 * correct / total
 
-def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=6):
+def run(epochs=120, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=6):
     model = TransformerLite(t=t, k=k, heads=heads)
     model = model.to('cuda:0')
     # Create loss function and optimizer
@@ -77,7 +77,7 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=6):
     optimizer = optim.Adam(params=model.parameters(), lr=1e-4,weight_decay=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
     dataset = PCMDataSet("./0524_data")
-    train_size = int(0.9 * len(dataset))  # 90% for training
+    train_size = int(0.8 * len(dataset))  # 90% for training
     test_size = len(dataset) - train_size  # Remaining 10% for testing
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
     test_dataset_list = list(test_dataset)
@@ -89,7 +89,7 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=6):
     print("Number of data points in the train set:", num_train_data)
     train_iter = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_iter = DataLoader(test_dataset,batch_size=BATCH_SIZE,shuffle=True)
-
+    best_test_acc = 0
     # Training loop
     for epoch in range(epochs):
         print(f'\n Epoch {epoch}')
@@ -101,10 +101,12 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=6):
                                       lr_scheduler,
                                       criterion)
         test_acc =test(test_iter,model)
+        if test_acc > best_test_acc:
+            best_test_acc = test_acc
+            torch.save(model, 'model_best.pt')
         print(f'\n training loss:{train_loss},training acc:{train_acc}')
         print(f'\nFinished.test acc:{test_acc}')
-
-    torch.save(model,'model.pt')
+    torch.save(model, 'model_final.pt')
 
 torch.cuda.empty_cache()
 run()
