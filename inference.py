@@ -39,18 +39,18 @@ def infer(MAX_LENGTH=1000):
     pcm_data = hi.butter_highpass_filter(pcm_data, 18000, 63333)
     abs_array = np.abs(pcm_data)
     index = np.argmax(abs_array > 1000) + 320
-    waveform = torch.from_numpy(pcm_data.copy()[index:index + 2000]).float()  # 5ms = 320 samples
+    waveform = torch.from_numpy(pcm_data.copy()[index:index + 1500]).float()  # 5ms = 320 samples
     waveform = waveform.unsqueeze(1)
     time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
     waveform = torch.cat((waveform, time_index), dim=1)
     waveform = torch.unsqueeze(waveform,0)
-    print(waveform.shape)
     # if pcmfile.size(1) > MAX_LENGTH:
     #     pcmfile = pcmfile[:, 10000:10000 + MAX_LENGTH, :]
     waveform = waveform.to(device)
 
     # Perform the inference
     output = model(waveform)
-    print(f"The prediction of this room is: Room {(torch.argmax(output, dim=1))}")
+    print(f"The prediction of this room is: Room {(torch.argmax(output, dim=1) + 1)}")
+    print(output)
 
 infer()

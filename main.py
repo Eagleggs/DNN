@@ -10,7 +10,7 @@ from transformerLite import TransformerLite
 from get_data import PCMDataSet
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data import random_split
-SEQUANCE_LEN =2000
+SEQUANCE_LEN =1500
 
 
 def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQUANCE_LEN, GRADIENT_CLIPPING=1.0):
@@ -69,14 +69,14 @@ def test(test_iter, model,MAX_LENGTH=SEQUANCE_LEN):
         correct += (predicted == torch.argmax(label, dim=1)).sum().item()
     return 100 * correct / total
 
-def run(epochs=120, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=10):
+def run(epochs=120, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=15):
     model = TransformerLite(t=t, k=k, heads=heads)
     model = model.to('cuda:0')
     # Create loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=model.parameters(), lr=1e-4,weight_decay=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
-    dataset = PCMDataSet("./0524_25_data")
+    dataset = PCMDataSet("./all")
     train_size = int(0.8 * len(dataset))  # 90% for training
     test_size = len(dataset) - train_size  # Remaining 10% for testing
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])

@@ -50,7 +50,7 @@ class TransformerLite(nn.Module):
             nn.ReLU(),
             nn.Linear(1000,500, bias=True),
             nn.ReLU(),
-            nn.Linear(500,4)
+            nn.Linear(500,20)
         )
 
     def forward(self,x):
