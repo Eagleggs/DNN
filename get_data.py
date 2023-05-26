@@ -5,6 +5,8 @@ from torch.utils.data import Dataset, DataLoader
 import os
 import torch
 import numpy as np
+# import torch.nn.functional as F
+
 from torch.utils.data import Dataset, DataLoader
 from scipy import signal
 
@@ -50,47 +52,51 @@ class PCMDataSet(Dataset):
         return waveform,label
 
     def get_label(self, file):
-        match file.split('_')[-1]:
-            case "1.pcm":
-                return torch.Tensor([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "2.pcm":
-                return torch.Tensor([0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "3.pcm":
-                return torch.Tensor([0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "4.pcm":
-                return torch.Tensor([0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "5.pcm":
-                return torch.Tensor([0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "6.pcm":
-                return torch.Tensor([0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "7.pcm":
-                return torch.Tensor([0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "8.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0])
-            case "9.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0])
-            case "10.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0])
-            case "11.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0])
-            case "12.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0])
-            case "13.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0])
-            case "14.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0])
-            case "15.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0])
-            case "16.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0])
-            case "17.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0])
-            case "18.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0])
-            case "19.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0])
-            case "20.pcm":
-                return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1])
+        res = int(file.split('_')[-1].split('.')[0])
+        output = torch.zeros(20)
+        output[res-1] = 1
+        return output
+        # match file.split('_')[-1]:
+        #     case "1.pcm":
+        #         return torch.Tensor([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "2.pcm":
+        #         return torch.Tensor([0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "3.pcm":
+        #         return torch.Tensor([0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "4.pcm":
+        #         return torch.Tensor([0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "5.pcm":
+        #         return torch.Tensor([0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "6.pcm":
+        #         return torch.Tensor([0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "7.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "8.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "9.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0])
+        #     case "10.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0])
+        #     case "11.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0])
+        #     case "12.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0])
+        #     case "13.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0])
+        #     case "14.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0])
+        #     case "15.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0])
+        #     case "16.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0])
+        #     case "17.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0])
+        #     case "18.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0])
+        #     case "19.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0])
+        #     case "20.pcm":
+        #         return torch.Tensor([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1])
 
 
 

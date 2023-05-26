@@ -76,7 +76,7 @@ def run(epochs=120, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=15):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=model.parameters(), lr=1e-4,weight_decay=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
-    dataset = PCMDataSet("./all")
+    dataset = PCMDataSet("./0524_data")
     train_size = int(0.8 * len(dataset))  # 90% for training
     test_size = len(dataset) - train_size  # Remaining 10% for testing
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
