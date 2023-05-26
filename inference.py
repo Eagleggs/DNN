@@ -21,13 +21,13 @@ def load_file(pcm_path):
     waveform = torch.unsqueeze(waveform,0)
     return waveform
 
-def infer(MAX_LENGTH=1000):
+def infer():
     parser = argparse.ArgumentParser(prog='Path', epilog='Text at the bottom of help')
     parser.add_argument('pcmName')
     args = parser.parse_args()
 
     # Load the model (specify the map_location parameter to load on CPU)
-    model = torch.load('model_best.pt', map_location=torch.device('cpu'))
+    model = torch.load('model_best_26.pt', map_location=torch.device('cpu'))
 
     device = torch.device('cpu')
     model = model.to(device)

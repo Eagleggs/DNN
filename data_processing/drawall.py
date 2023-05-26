@@ -12,13 +12,15 @@ from get_data import highpassfilter
 dt = np.dtype('<h')
 
 # path1 = 'samples/recording_1684330722347_13.pcm'
-path1 = '../all/recording_1684942144064_8.pcm'
+path1 = '../all/recording_1685115827233_7.pcm'
 
 y = np.fromfile(path1, dtype=dt, sep='', offset=0)
 hi = highpassfilter();
 y = hi.butter_highpass_filter(y, 18000, 63333)
+abs_array = np.abs(y)
+index = np.argmax(abs_array > 1000) + 320
 # cut signal
-# y = y[8500:11000]
+y = y[index:index+1000]
 cnt = len(y)
 
 # Time Domain
