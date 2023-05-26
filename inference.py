@@ -38,8 +38,13 @@ def infer():
     hi = highpassfilter();
     pcm_data = hi.butter_highpass_filter(pcm_data, 18000, 63333)
     abs_array = np.abs(pcm_data)
-    index = np.argmax(abs_array > 1000) + 320
-    waveform = torch.from_numpy(pcm_data.copy()[index:index + 1500]).float()  # 5ms = 320 samples
+
+    index_f = np.argmax(abs_array > 1000)
+    max = np.max(abs_array[index_f:index_f + 3000])
+    indices = np.where(abs_array > max / 4)[0]
+    indices = indices[indices < index_f + 3000]
+    id = np.max(indices)
+    waveform = torch.from_numpy(pcm_data.copy()[id:id + 1500]).float()  # 5ms = 320 samples
     waveform = waveform.unsqueeze(1)
     time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
     waveform = torch.cat((waveform, time_index), dim=1)

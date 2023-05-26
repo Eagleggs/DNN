@@ -26,8 +26,6 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         inp,label = batch
         inp = inp.to('cuda:0')
         label = label.to('cuda:0')
-        # if inp.size(1) > MAX_LENGTH:
-        #     inp = inp[:, 9000:9000+MAX_LENGTH,:]
         output = model(inp)  # output(batchsize,k=1,4)
         output = output.squeeze()  # output(batchsize,4)
         loss = criterion(output, label)
@@ -69,7 +67,7 @@ def test(test_iter, model,MAX_LENGTH=SEQUANCE_LEN):
         correct += (predicted == torch.argmax(label, dim=1)).sum().item()
     return 100 * correct / total
 
-def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=22):
+def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
     model = TransformerLite(t=t, k=k, heads=heads)
     model = model.to('cuda:0')
     # Create loss function and optimizer
