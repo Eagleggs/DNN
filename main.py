@@ -108,7 +108,7 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
             torch.save(model, 'model_best_26_2.pt')
         else:
             patience +=1
-            if patience > 15:
+            if patience > 25:
                 break
     torch.save(model, 'model_final_26_2.pt')
 

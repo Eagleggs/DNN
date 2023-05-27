@@ -27,7 +27,7 @@ def infer():
     args = parser.parse_args()
 
     # Load the model (specify the map_location parameter to load on CPU)
-    model = torch.load('model_best_26.pt', map_location=torch.device('cpu'))
+    model = torch.load('model_best_26_2.pt', map_location=torch.device('cpu'))
 
     device = torch.device('cpu')
     model = model.to(device)
