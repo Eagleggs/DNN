@@ -1,7 +1,7 @@
 import argparse
 
 import numpy as np
-aimport torch
+import torch
 import torch.nn as nn
 
 from get_data import highpassfilter
