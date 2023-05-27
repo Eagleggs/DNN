@@ -1,13 +1,10 @@
 import argparse
 
 import numpy as np
-from torch import optim
-from tqdm import tqdm
-import torch
+aimport torch
 import torch.nn as nn
 
 from get_data import highpassfilter
-from transformerLite import TransformerLite
 
 
 def load_file(pcm_path):

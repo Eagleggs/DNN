@@ -2,6 +2,8 @@ import argparse
 import os
 import time
 
+import numpy as np
+import requests
 from torch import optim
 from tqdm import tqdm
 import torch
@@ -75,19 +77,19 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=model.parameters(), lr=1e-4,weight_decay=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
-    # dataset = PCMDataSet("./all")
-    # train_size = int(0.85 * len(dataset))  # 90% for training
-    # test_size = len(dataset) - train_size  # Remaining 10% for testing
-    # train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
-    # test_dataset_list = list(test_dataset)
-    # train_dataset_list = list(train_dataset)
-    # num_test_data = len(test_dataset_list)
-    # num_train_data = len(train_dataset_list)
-    # # Print the number of data points in the test set
-    # print("Number of data points in the test set:", num_test_data)
-    # print("Number of data points in the train set:", num_train_data)
-    train_dataset = PCMDataSet('0525_data')
-    test_dataset =PCMDataSet('0524_data')
+    dataset = PCMDataSet("./all")
+    train_size = int(0.85 * len(dataset))  # 90% for training
+    test_size = len(dataset) - train_size  # Remaining 10% for testing
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    test_dataset_list = list(test_dataset)
+    train_dataset_list = list(train_dataset)
+    num_test_data = len(test_dataset_list)
+    num_train_data = len(train_dataset_list)
+    # Print the number of data points in the test set
+    print("Number of data points in the test set:", num_test_data)
+    print("Number of data points in the train set:", num_train_data)
+    # train_dataset = PCMDataSet('0525_data')
+    # test_dataset =PCMDataSet('0524_data')
     train_iter = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_iter = DataLoader(test_dataset,batch_size=BATCH_SIZE,shuffle=True)
     best_test_acc = 0
@@ -109,14 +111,23 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             patience = 0
-            torch.save(model, 'model_best_26_test.pt')
+            torch.save(model.state_dict(), 'model_best_26_test.pt')
         else:
             if train_acc > best_train_acc:
                 best_train_acc = train_acc
                 patience +=1
                 if patience > 15:
                     break
-    torch.save(model, 'model_final_26_test.pt')
+    torch.save(model.state_dict(), 'model_final_26_test.pt')
 
 torch.cuda.empty_cache()
 run()
+# r = requests.post("http://localhost:8080/isalive")
+# with open("./0525_data/recording_1685001532559_13.pcm", 'rb') as f:
+#     pcm_data = np.frombuffer(f.read(), dtype=np.int16).tolist()
+# r = requests.post("http://localhost:8080/predict",json={
+#     "instances":[{"pcm":pcm_data}]
+# })
+# print(r)
+# r_json = r.json()
+# print(f"the room number is :{r_json['predictions'][0]}")
