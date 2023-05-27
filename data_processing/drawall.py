@@ -14,19 +14,23 @@ dt = np.dtype('<h')
 path = 'samples/recording_15k.pcm'
 path1 = '../all/recording_1684330725318_13.pcm'
 path2 = '../0517_data/recording_1684330759387_13.pcm'
-
-y = np.fromfile(path, dtype=dt, sep='', offset=0)
+path4 = '../229_home_data_15k/recording_1685194571015_home_1.pcm'
+y = np.fromfile(path4, dtype=dt, sep='', offset=0)
 hi = highpassfilter();
 y = hi.butter_highpass_filter(y, 12000, 63333)
 abs_array = np.abs(y)
-index_f = np.argmax(abs_array > 1000)
+index_f = 0
+freq = 2000
+while index_f>14000 or index_f<7000:
+    index_f = np.argmax(abs_array > freq)
+    freq += 500
 max = np.max(abs_array[index_f:index_f + 3000])
-indices = np.where(abs_array > max / 100)[0]
+indices = np.where(abs_array > max / 50)[0]
 indices = indices[indices < index_f + 3000]
 id = np.max(indices)
 # cut signal
 # y = y[0:5000]
-y = y[id:id+1500]
+y = y[id+3000:id+15000]
 cnt = len(y)
 
 # Time Domain
