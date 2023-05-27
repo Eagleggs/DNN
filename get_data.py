@@ -44,7 +44,7 @@ class PCMDataSet(Dataset):
         abs_array = np.abs(pcm_data)
         index_f = np.argmax(abs_array > 1000)
         max = np.max(abs_array[index_f:index_f+3000])
-        indices = np.where(abs_array > max/4)[0]
+        indices = np.where(abs_array > max/100)[0]
         indices = indices[indices<index_f + 3000]
         id = np.max(indices)
         waveform = torch.from_numpy(pcm_data.copy()[id:id + 1500]).float()  # 5ms = 320 samples
