@@ -67,8 +67,9 @@ def test(test_iter, model,MAX_LENGTH=SEQUANCE_LEN):
         correct += (predicted == torch.argmax(label, dim=1)).sum().item()
     return 100 * correct / total
 
-def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
+def run(epochs=300, k=2, heads=10, t=SEQUANCE_LEN, BATCH_SIZE=16):
     model = TransformerLite(t=t, k=k, heads=heads)
+    # model = torch.load('model_final_26_2.pt', map_location=torch.device('cpu'))
     model = model.to('cuda:0')
     # Create loss function and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -88,6 +89,7 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
     train_iter = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_iter = DataLoader(test_dataset,batch_size=BATCH_SIZE,shuffle=True)
     best_test_acc = 0
+    best_train_acc = 0
     patience = 0 #early stopping
     # Training loop
     for epoch in range(epochs):
@@ -105,12 +107,14 @@ def run(epochs=300, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             patience = 0
-            torch.save(model, 'model_best_26_2.pt')
+            torch.save(model, 'model_best_26_3.pt')
         else:
-            patience +=1
-            if patience > 25:
-                break
-    torch.save(model, 'model_final_26_2.pt')
+            if train_acc > best_train_acc:
+                best_train_acc = train_acc
+                patience +=1
+                if patience > 6:
+                    break
+    torch.save(model, 'model_final_26_3.pt')
 
 torch.cuda.empty_cache()
 run()
