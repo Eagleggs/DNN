@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 
 from get_data import highpassfilter
+from transformerLite import TransformerLite
 
 
 def load_file(pcm_path):
@@ -22,9 +23,9 @@ def infer():
     parser = argparse.ArgumentParser(prog='Path', epilog='Text at the bottom of help')
     parser.add_argument('pcmName')
     args = parser.parse_args()
-
+    model = TransformerLite(t=1500, k=2, heads=8)
     # Load the model (specify the map_location parameter to load on CPU)
-    model = torch.load('model_best_26_3.pt', map_location=torch.device('cpu'))
+    model.load_state_dict(torch.load('model_best_26_test.pt', map_location=torch.device('cpu')))
 
     device = torch.device('cpu')
     model = model.to(device)
@@ -36,12 +37,20 @@ def infer():
     pcm_data = hi.butter_highpass_filter(pcm_data, 18000, 63333)
     abs_array = np.abs(pcm_data)
 
-    index_f = np.argmax(abs_array > 1000)
-    max = np.max(abs_array[index_f:index_f + 3000])
-    indices = np.where(abs_array > max / 4)[0]
+    index_f = 0
+    amplitude = 3000
+    while index_f > 16000 or index_f < 8000:
+        index_f = np.argmax(pcm_data > amplitude)
+        amplitude += 100
+        if amplitude > 4000:
+            break
+    max = np.max(pcm_data[index_f:index_f + 3000])
+    if np.max(pcm_data) != max:
+        print("1")
+    indices = np.where(pcm_data > max / 5)[0]
     indices = indices[indices < index_f + 3000]
     id = np.max(indices)
-    waveform = torch.from_numpy(pcm_data.copy()[id:id + 1500]).float()  # 5ms = 320 samples
+    waveform = torch.from_numpy(pcm_data.copy()[id:id + 1500]).float()
     waveform = waveform.unsqueeze(1)
     time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
     waveform = torch.cat((waveform, time_index), dim=1)

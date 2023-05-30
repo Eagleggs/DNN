@@ -7,21 +7,25 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from scipy import signal
+import torch.nn.functional as F
 
 
 class highpassfilter():
     def __init__(self):
         self.frequency = 63333;
 
-    def butter_highpass(self, cutoff, fs, order=5):
+    def butter_highpass_lowpass(self, cutoff, fs, order=5):
         nyq = 0.5 * fs
         normal_cutoff = cutoff / nyq
+        high = 16000 / nyq
         b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
-        return b, a
+        c, d = signal.butter(order, high, btype='low', analog=False)
+        return b, a, c, d
 
     def butter_highpass_filter(self, data, cutoff, fs, order=5):
-        b, a = self.butter_highpass(cutoff, fs, order=order)
+        b, a, c, d = self.butter_highpass_lowpass(cutoff, fs, order=order)
         y = signal.filtfilt(b, a, data)
+        y = signal.filtfilt(c, d, y)
         return y
 
 
@@ -38,20 +42,24 @@ class PCMDataSet(Dataset):
         label = self.labels[index]
         with open(pcm_path, 'rb') as f:
             pcm_data = np.frombuffer(f.read(), dtype=np.int16)
-            # print(pcm_data)
+
         hi = highpassfilter();
-        pcm_data = hi.butter_highpass_filter(pcm_data, 12000, 63333)
-        abs_array = np.abs(pcm_data)
+        pcm_data = hi.butter_highpass_filter(pcm_data, 14000, 63333)
         index_f = 0
-        freq = 2000
-        while index_f > 14000 or index_f < 7000:
-            index_f = np.argmax(abs_array > freq)
-            freq += 500
-        max = np.max(abs_array[index_f:index_f + 3000])
-        indices = np.where(abs_array > max / 50)[0]
+        amplitude = 3000
+        while index_f > 16000 or index_f < 8000:
+            index_f = np.argmax(pcm_data > amplitude)
+            amplitude += 100
+            if amplitude > 4000:
+                break
+        max = np.max(pcm_data[index_f:index_f + 3000])
+        if np.max(pcm_data) != max:
+            print("1")
+        indices = np.where(pcm_data > max/5)[0]
         indices = indices[indices < index_f + 3000]
         id = np.max(indices)
         waveform = torch.from_numpy(pcm_data.copy()[id:id + 1500]).float()
+        # waveform = F.normalize(torch.abs(waveform),p=1.0, dim=0, eps=1e-12, out=None)
         waveform = waveform.unsqueeze(1)
         time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
         waveform = torch.cat((waveform, time_index), dim=1)
