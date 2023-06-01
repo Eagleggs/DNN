@@ -45,12 +45,13 @@ class TransformerLite(nn.Module):
         self.attentionlayer = MultiHeadSelfAttention(k, heads=heads)
         self.layernorm = nn.LayerNorm([t, k])
         self.position_embedding = nn.Embedding(t, k)
+        self.do = nn.Dropout(0.7)
         self.seq = nn.Sequential(
-            nn.Linear(t*k, 1000, bias=True),
-            nn.ReLU(),
-            nn.Linear(1000,500, bias=True),
-            nn.ReLU(),
-            nn.Linear(500,20)
+            nn.Linear(t*k, 500, bias=True),
+            nn.Sigmoid(),
+            # nn.Linear(1000,500, bias=True),
+            # nn.ReLU(),
+            nn.Linear(500,4)
         )
 
     def forward(self,x):
@@ -60,6 +61,7 @@ class TransformerLite(nn.Module):
         x = x + p
         y = self.attentionlayer(x)
         x = x + y
+        x = self.do(x)
         x = self.layernorm(x)
         y = self.seq(x.transpose(1,2).reshape(-1,t*k))
         y = F.softmax(y, dim=1) #(b,k,4)

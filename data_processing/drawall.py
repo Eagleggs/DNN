@@ -14,22 +14,22 @@ dt = np.dtype('<h')
 path = 'samples/recording_15k.pcm'
 path1 = '../all/recording_1684330725318_13.pcm'
 path2 = '../0517_data/recording_1684330759387_13.pcm'
-path4 = '../0530_data/0530_data_3/recording_1685452883222_6.pcm'
+path4 = '../0531_data/recording_1685544991348_8.pcm'
 y = np.fromfile(path4, dtype=dt, sep='', offset=0)
 hi = highpassfilter()
-y = hi.butter_highpass_filter(y, 13000, 63333)
+y = hi.butter_highpass_filter(y, 2000, 63333)
 abs_array = np.abs(y)
 index_f = 0
-amplitude = 3000
+amplitude = 10000
 while index_f > 16000 or index_f < 8000:
     index_f = np.argmax(y > amplitude)
     amplitude += 100
-    if amplitude > 4000:
+    if amplitude > 30000:
         break
 max = np.max(y[index_f:index_f + 3000])
 if np.max(y) != max:
     print("1")
-indices = np.where(y > max - 2000)[0]
+indices = np.where(y > max - 5000)[0]
 indices = indices[indices < index_f + 3000]
 id = np.max(indices)
 # cut signal

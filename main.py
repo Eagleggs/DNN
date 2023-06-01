@@ -75,8 +75,8 @@ def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
     model = model.to('cuda:0')
     # Create loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(params=model.parameters(), lr=1e-5, weight_decay=1e-4)
-    lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
+    optimizer = optim.Adam(params=model.parameters(), lr=1e-5, weight_decay=1e-3)
+    lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(20/(i+1), 1.0))
     # dataset = PCMDataSet("./0530_data/0530_all")
     # train_size = int(0.8 * len(dataset))  # 90% for training
     # test_size = len(dataset) - train_size  # Remaining 10% for testing
@@ -119,14 +119,14 @@ def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             patience = 0
-            torch.save(model.state_dict(), 'model_best_30_test.pt')
+            torch.save(model.state_dict(), 'model_best_1.pt')
         else:
             if train_acc > best_train_acc:
                 best_train_acc = train_acc
                 patience += 1
                 if patience > 15:
                     break
-    torch.save(model.state_dict(), 'model_final_30_test.pt')
+    torch.save(model.state_dict(), 'model_final_1.pt')
 
 
 torch.cuda.empty_cache()

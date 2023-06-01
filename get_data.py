@@ -17,7 +17,7 @@ class highpassfilter():
     def butter_highpass_lowpass(self, cutoff, fs, order=5):
         nyq = 0.5 * fs
         normal_cutoff = cutoff / nyq
-        high = 18000 / nyq
+        high = 10000 / nyq
         b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
         c, d = signal.butter(order, high, btype='low', analog=False)
         return b, a, c, d
@@ -25,7 +25,7 @@ class highpassfilter():
     def butter_highpass_filter(self, data, cutoff, fs, order=5):
         b, a, c, d = self.butter_highpass_lowpass(cutoff, fs, order=order)
         y = signal.filtfilt(b, a, data)
-        # y = signal.filtfilt(c, d, y)
+        y = signal.filtfilt(c, d, y)
         return y
 
 
@@ -44,20 +44,20 @@ class PCMDataSet(Dataset):
             pcm_data = np.frombuffer(f.read(), dtype=np.int16)
 
         hi = highpassfilter();
-        pcm_data = hi.butter_highpass_filter(pcm_data, 13000, 63333)
+        pcm_data = hi.butter_highpass_filter(pcm_data, 2000, 63333) #filter the human speaking noise
         index_f = 0
-        amplitude = 5000
+        amplitude = 10000
         while index_f > 16000 or index_f < 8000:
             index_f = np.argmax(pcm_data > amplitude)
             amplitude += 100
-            if amplitude > 10000:
+            if amplitude > 30000:
                 break
         max = np.max(pcm_data[index_f:index_f + 3000])
         if np.max(pcm_data) != max:
-            print("1")
-        indices = np.where(pcm_data > max - 2000)[0]
+            print(np.max(pcm_data) )
+        indices = np.where(pcm_data > max - 5000)[0]
         indices = indices[indices < index_f + 3000]
-        id = np.min(indices)
+        id = np.max(indices)
         waveform = torch.from_numpy(pcm_data.copy()[id:id + 3000]).float()
         freq, t, stft = signal.spectrogram(waveform, fs=63333, mode='magnitude',nperseg=10,noverlap=1,nfft = 1000)
         stft = torch.from_numpy(stft.T.copy()).float()
@@ -70,44 +70,52 @@ class PCMDataSet(Dataset):
 
     def get_label(self, file):
         match file.split('_')[-1]:
-            case "1.pcm":
-                return torch.Tensor([0.7, 0.2, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "2.pcm":
-                return torch.Tensor([0.2, 0.6, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "3.pcm":
-                return torch.Tensor([0.05, 0.1, 0.6, 0, 0, 0, 0.1, 0.05, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "4.pcm":
-                return torch.Tensor([0, 0, 0, 0.8, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
             case "5.pcm":
-                return torch.Tensor([0, 0, 0, 0.1, 0.8, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                return torch.Tensor([1,0,0,0])
             case "6.pcm":
-                return torch.Tensor([0, 0, 0, 0.1, 0.1, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                return torch.Tensor([0,1,0,0])
             case "7.pcm":
-                return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.7, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                return torch.Tensor([0,0,1,0])
             case "8.pcm":
-                return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.1, 0.7, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "9.pcm":
-                return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.1, 0.1, 0.7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "10.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "11.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.2, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "12.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.7, 0.15, 0, 0, 0, 0, 0, 0, 0])
-            case "13.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.7, 0.15, 0, 0, 0, 0, 0, 0])
-            case "14.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.15, 0.6, 0.15, 0, 0, 0, 0, 0])
-            case "15.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.6, 0.2, 0, 0, 0, 0])
-            case "16.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.2, 0.7, 0, 0, 0, 0])
-            case "17.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0.2, 0])
-            case "18.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.7, 0.2, 0])
-            case "19.pcm":
-                return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15, 0.7, 0])
+                return torch.Tensor([0,0,0,1])
+            # case "1.pcm":
+            #     return torch.Tensor([0.7, 0.2, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "2.pcm":
+            #     return torch.Tensor([0.2, 0.6, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "3.pcm":
+            #     return torch.Tensor([0.05, 0.1, 0.6, 0, 0, 0, 0.1, 0.05, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "4.pcm":
+            #     return torch.Tensor([0, 0, 0, 0.8, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "5.pcm":
+            #     return torch.Tensor([0, 0, 0, 0.1, 0.8, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "6.pcm":
+            #     return torch.Tensor([0, 0, 0, 0.1, 0.1, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "7.pcm":
+            #     return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.7, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "8.pcm":
+            #     return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.1, 0.7, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "9.pcm":
+            #     return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.1, 0.1, 0.7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "10.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "11.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.2, 0, 0, 0, 0, 0, 0, 0, 0])
+            # case "12.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.7, 0.15, 0, 0, 0, 0, 0, 0, 0])
+            # case "13.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.7, 0.15, 0, 0, 0, 0, 0, 0])
+            # case "14.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.15, 0.6, 0.15, 0, 0, 0, 0, 0])
+            # case "15.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.6, 0.2, 0, 0, 0, 0])
+            # case "16.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.2, 0.7, 0, 0, 0, 0])
+            # case "17.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0.2, 0])
+            # case "18.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.7, 0.2, 0])
+            # case "19.pcm":
+            #     return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15, 0.7, 0])
 
 #
 # dataset = PCMDataSet("./0524_data")
