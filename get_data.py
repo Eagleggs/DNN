@@ -17,7 +17,7 @@ class highpassfilter():
     def butter_highpass_lowpass(self, cutoff, fs, order=5):
         nyq = 0.5 * fs
         normal_cutoff = cutoff / nyq
-        high = 16000 / nyq
+        high = 18000 / nyq
         b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
         c, d = signal.butter(order, high, btype='low', analog=False)
         return b, a, c, d
@@ -25,7 +25,7 @@ class highpassfilter():
     def butter_highpass_filter(self, data, cutoff, fs, order=5):
         b, a, c, d = self.butter_highpass_lowpass(cutoff, fs, order=order)
         y = signal.filtfilt(b, a, data)
-        y = signal.filtfilt(c, d, y)
+        # y = signal.filtfilt(c, d, y)
         return y
 
 
@@ -44,27 +44,29 @@ class PCMDataSet(Dataset):
             pcm_data = np.frombuffer(f.read(), dtype=np.int16)
 
         hi = highpassfilter();
-        pcm_data = hi.butter_highpass_filter(pcm_data, 14000, 63333)
+        pcm_data = hi.butter_highpass_filter(pcm_data, 13000, 63333)
         index_f = 0
-        amplitude = 3000
+        amplitude = 5000
         while index_f > 16000 or index_f < 8000:
             index_f = np.argmax(pcm_data > amplitude)
             amplitude += 100
-            if amplitude > 4000:
+            if amplitude > 10000:
                 break
         max = np.max(pcm_data[index_f:index_f + 3000])
         if np.max(pcm_data) != max:
             print("1")
-        indices = np.where(pcm_data > max/5)[0]
+        indices = np.where(pcm_data > max - 2000)[0]
         indices = indices[indices < index_f + 3000]
-        id = np.max(indices)
-        waveform = torch.from_numpy(pcm_data.copy()[id:id + 1500]).float()
-        # waveform = F.normalize(torch.abs(waveform),p=1.0, dim=0, eps=1e-12, out=None)
-        waveform = waveform.unsqueeze(1)
-        time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
-        waveform = torch.cat((waveform, time_index), dim=1)
+        id = np.min(indices)
+        waveform = torch.from_numpy(pcm_data.copy()[id:id + 3000]).float()
+        freq, t, stft = signal.spectrogram(waveform, fs=63333, mode='magnitude',nperseg=10,noverlap=1,nfft = 1000)
+        stft = torch.from_numpy(stft.T.copy()).float()
+        # waveform = F.normalize(waveform, p=2.0, dim=0, eps=1e-12, out=None)
+        # waveform = waveform.unsqueeze(1)
+        # time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
+        # waveform = torch.cat((waveform, time_index), dim=1)
         # print(waveform)
-        return waveform, label
+        return stft, label
 
     def get_label(self, file):
         match file.split('_')[-1]:

@@ -25,7 +25,7 @@ def infer():
     args = parser.parse_args()
     model = TransformerLite(t=1500, k=2, heads=8)
     # Load the model (specify the map_location parameter to load on CPU)
-    model.load_state_dict(torch.load('model_best_26_test.pt', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load('model_best_30_test.pt', map_location=torch.device('cpu')))
 
     device = torch.device('cpu')
     model = model.to(device)
@@ -34,7 +34,7 @@ def infer():
     with open(args.pcmName, 'rb') as f:
         pcm_data = np.frombuffer(f.read(), dtype=np.int16)
     hi = highpassfilter();
-    pcm_data = hi.butter_highpass_filter(pcm_data, 18000, 63333)
+    pcm_data = hi.butter_highpass_filter(pcm_data, 14000, 63333)
     abs_array = np.abs(pcm_data)
 
     index_f = 0

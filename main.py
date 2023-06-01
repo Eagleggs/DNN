@@ -13,7 +13,7 @@ from get_data import PCMDataSet
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data import random_split
 
-SEQUANCE_LEN = 1500
+SEQUANCE_LEN = 333
 
 
 def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQUANCE_LEN, GRADIENT_CLIPPING=1.0):
@@ -69,18 +69,27 @@ def test(test_iter, model, MAX_LENGTH=SEQUANCE_LEN):
     return 100 * correct / total
 
 
-def run(epochs=600, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
+def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
     model = TransformerLite(t=t, k=k, heads=heads)
     # model = torch.load('model_final_26_2.pt', map_location=torch.device('cpu'))
     model = model.to('cuda:0')
     # Create loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(params=model.parameters(), lr=1e-4, weight_decay=1e-4)
+    optimizer = optim.Adam(params=model.parameters(), lr=1e-5, weight_decay=1e-4)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(i / (10_000 / BATCH_SIZE), 1.0))
-    dataset = PCMDataSet("./0530_data/0530_all")
-    train_size = int(0.8 * len(dataset))  # 90% for training
-    test_size = len(dataset) - train_size  # Remaining 10% for testing
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    # dataset = PCMDataSet("./0530_data/0530_all")
+    # train_size = int(0.8 * len(dataset))  # 90% for training
+    # test_size = len(dataset) - train_size  # Remaining 10% for testing
+    # train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    # test_dataset_list = list(test_dataset)
+    # train_dataset_list = list(train_dataset)
+    # num_test_data = len(test_dataset_list)
+    # num_train_data = len(train_dataset_list)
+    # # # Print the number of data points in the test set
+    # print("Number of data points in the test set:", num_test_data)
+    # print("Number of data points in the train set:", num_train_data)
+    train_dataset = PCMDataSet('0531_data')
+    test_dataset = PCMDataSet('0531_eval')
     test_dataset_list = list(test_dataset)
     train_dataset_list = list(train_dataset)
     num_test_data = len(test_dataset_list)
@@ -88,15 +97,7 @@ def run(epochs=600, k=2, heads=8, t=SEQUANCE_LEN, BATCH_SIZE=20):
     # Print the number of data points in the test set
     print("Number of data points in the test set:", num_test_data)
     print("Number of data points in the train set:", num_train_data)
-    # train_dataset = PCMDataSet('0530_data/0530_train')
-    # test_dataset = PCMDataSet('0530_data/0530_data_3')
-    # test_dataset_list = list(test_dataset)
-    # train_dataset_list = list(train_dataset)
-    # num_test_data = len(test_dataset_list)
-    # num_train_data = len(train_dataset_list)
-    # # Print the number of data points in the test set
-    # print("Number of data points in the test set:", num_test_data)
-    # print("Number of data points in the train set:", num_train_data)
+
     train_iter = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_iter = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
     best_test_acc = 0

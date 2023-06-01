@@ -14,10 +14,10 @@ dt = np.dtype('<h')
 path = 'samples/recording_15k.pcm'
 path1 = '../all/recording_1684330725318_13.pcm'
 path2 = '../0517_data/recording_1684330759387_13.pcm'
-path4 = '../0530_data/0530_data_3/recording_1685451951996_16.pcm'
+path4 = '../0530_data/0530_data_3/recording_1685452883222_6.pcm'
 y = np.fromfile(path4, dtype=dt, sep='', offset=0)
 hi = highpassfilter()
-y = hi.butter_highpass_filter(y, 14000, 63333)
+y = hi.butter_highpass_filter(y, 13000, 63333)
 abs_array = np.abs(y)
 index_f = 0
 amplitude = 3000
@@ -29,12 +29,13 @@ while index_f > 16000 or index_f < 8000:
 max = np.max(y[index_f:index_f + 3000])
 if np.max(y) != max:
     print("1")
-indices = np.where(y > max / 5)[0]
+indices = np.where(y > max - 2000)[0]
 indices = indices[indices < index_f + 3000]
 id = np.max(indices)
 # cut signal
 # y = y[0:5000]
 y = y[id:id+3000]
+# y = y/np.linalg.norm(y)
 cnt = len(y)
 
 # Time Domain
@@ -60,7 +61,7 @@ plt.ylim(19000,22000)
 plt.show()
 
 # Spectrogram 2
-freq, t, stft = signal.spectrogram(y, fs=63333, mode='complex')
+freq, t, stft = signal.spectrogram(y, fs=63333, mode='magnitude',nperseg=10,noverlap=1,nfft = 1000)
 #Sxx, freq, t = plt.specgram(Voice, Fs=Fs, mode='magnitude')
 plt.pcolormesh(t, freq, abs(stft), shading='gouraud')
 plt.title('Spectrogramm using STFT amplitude')
