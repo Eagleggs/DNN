@@ -13,7 +13,7 @@ from get_data import PCMDataSet
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data import random_split
 
-SEQUANCE_LEN = 333
+SEQUANCE_LEN = 733
 
 
 def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQUANCE_LEN, GRADIENT_CLIPPING=1.0):
@@ -69,7 +69,7 @@ def test(test_iter, model, MAX_LENGTH=SEQUANCE_LEN):
     return 100 * correct / total
 
 
-def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
+def run(epochs=600, k=1001, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
     model = TransformerLite(t=t, k=k, heads=heads)
     # model = torch.load('model_final_26_2.pt', map_location=torch.device('cpu'))
     model = model.to('cuda:0')
