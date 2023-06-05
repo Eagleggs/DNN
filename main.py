@@ -88,8 +88,8 @@ def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
     # # # Print the number of data points in the test set
     # print("Number of data points in the test set:", num_test_data)
     # print("Number of data points in the train set:", num_train_data)
-    train_dataset = PCMDataSet('0531_data')
-    test_dataset = PCMDataSet('0601children_data')
+    train_dataset = PCMDataSet('all_data')
+    test_dataset = PCMDataSet('all_eval')
     test_dataset_list = list(test_dataset)
     train_dataset_list = list(train_dataset)
     num_test_data = len(test_dataset_list)

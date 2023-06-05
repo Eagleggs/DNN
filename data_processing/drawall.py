@@ -14,14 +14,14 @@ dt = np.dtype('<h')
 path = 'samples/recording_15k.pcm'
 path1 = '../all/recording_1684330725318_13.pcm'
 path2 = '../0517_data/recording_1684330759387_13.pcm'
-path4 = '../0531_data/recording_1685544991348_8.pcm'
+path4 = '../all_data/recording_1685628674078_14.pcm'
 y = np.fromfile(path4, dtype=dt, sep='', offset=0)
 hi = highpassfilter()
 y = hi.butter_highpass_filter(y, 2000, 63333)
 abs_array = np.abs(y)
 index_f = 0
 amplitude = 10000
-while index_f > 16000 or index_f < 8000:
+while index_f > 16000 or index_f < 7000:
     index_f = np.argmax(y > amplitude)
     amplitude += 100
     if amplitude > 30000:
