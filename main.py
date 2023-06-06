@@ -29,8 +29,8 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         inp, label = batch
         inp = inp.to('cuda:0')
         label = label.to('cuda:0')
-        output = model(inp)  # output(batchsize,k=1,4)
-        output = output.squeeze()  # output(batchsize,4)
+        output = model(inp)
+        output = output.squeeze()
         loss = criterion(output, label)
 
         loss.backward()
@@ -52,7 +52,7 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
     return avg_loss / len(train_iter), 100 * correct / total
 
 
-def test(test_iter, model, MAX_LENGTH=SEQUANCE_LEN):
+def test(test_iter, model):
     correct = 0
     total = 0
 
