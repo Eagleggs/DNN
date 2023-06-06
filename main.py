@@ -1,9 +1,4 @@
-import argparse
-import os
-import time
 
-import numpy as np
-import requests
 from torch import optim
 from tqdm import tqdm
 import torch
@@ -21,9 +16,6 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
     correct = 0
     total = 0
 
-    # Switch to train mode
-    # model.train()
-
     # Iterate through batches
     for batch in tqdm(train_iter):
         inp, label = batch
@@ -34,9 +26,6 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         loss = criterion(output, label)
 
         loss.backward()
-
-        # Clip gradients if the total gradient vector has a length > 1, we
-        # clip it back down to 1.
         if GRADIENT_CLIPPING > 0.0:
             nn.utils.clip_grad_norm_(model.parameters(), GRADIENT_CLIPPING)
 
@@ -48,7 +37,6 @@ def train(train_iter, model, optimizer, lr_scheduler, criterion, MAX_LENGTH=SEQU
         predicted = torch.argmax(output, dim=1)
         total += inp.size(0)
         correct += (predicted == torch.argmax(label, dim=1)).sum().item()
-        # print(100 * correct / total)
     return avg_loss / len(train_iter), 100 * correct / total
 
 
@@ -71,9 +59,7 @@ def test(test_iter, model):
 
 def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
     model = TransformerLite(t=t, k=k, heads=heads)
-    # model = torch.load('model_final_26_2.pt', map_location=torch.device('cpu'))
     model = model.to('cuda:0')
-    # Create loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=model.parameters(), lr=1e-5, weight_decay=1e-3)
     lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lambda i: min(20/(i+1), 1.0))
@@ -131,12 +117,3 @@ def run(epochs=600, k=501, heads=16, t=SEQUANCE_LEN, BATCH_SIZE=30):
 
 torch.cuda.empty_cache()
 run()
-# r = requests.post("http://localhost:8080/isalive")
-# with open("./0525_data/recording_1685001532559_13.pcm", 'rb') as f:
-#     pcm_data = np.frombuffer(f.read(), dtype=np.int16).tolist()
-# r = requests.post("http://localhost:8080/predict",json={
-#     "instances":[{"pcm":pcm_data}]
-# })
-# print(r)
-# r_json = r.json()
-# print(f"the room number is :{r_json['predictions'][0]}")
