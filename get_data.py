@@ -60,8 +60,8 @@ class PCMDataSet(Dataset):
         # id = np.max(indices)
         # waveform = torch.from_numpy(pcm_data.copy()[id:id + 3000]).float()
         # freq, t, stft = signal.spectrogram(waveform, fs=63333, mode='magnitude',nperseg=10,noverlap=1,nfft = 400)
-        t = stft_data['arr_0'].T
-        stft = torch.from_numpy(t).double()
+        t = stft_data['arr_0']
+        stft = torch.from_numpy(t).float()
         # print(stft.shape)
 
         # waveform = F.normalize(waveform, p=2.0, dim=0, eps=1e-12, out=None)
