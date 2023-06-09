@@ -38,29 +38,32 @@ class PCMDataSet(Dataset):
         return len(self.file_paths)
 
     def __getitem__(self, index):
-        pcm_path = self.file_paths[index]
+        npz_path = self.file_paths[index]
         label = self.labels[index]
-        with open(pcm_path, 'rb') as f:
-            pcm_data = np.frombuffer(f.read(), dtype=np.int16)
+        with open(npz_path, 'rb') as f:
+            stft_data = np.load(npz_path)
+        #
+        # hi = highpassfilter();
+        # pcm_data = hi.butter_highpass_filter(pcm_data, 2000, 63333) #filter the human speaking noise
+        # index_f = 0
+        # amplitude = 10000
+        # while index_f > 16000 or index_f < 7000:
+        #     index_f = np.argmax(pcm_data > amplitude)
+        #     amplitude += 100
+        #     if amplitude > 30000:
+        #         break
+        # max = np.max(pcm_data[index_f:index_f + 3000])
+        # if np.max(pcm_data) != max:
+        #     print(np.max(pcm_data) )
+        # indices = np.where(pcm_data > max - 5000)[0]
+        # indices = indices[indices < index_f + 3000]
+        # id = np.max(indices)
+        # waveform = torch.from_numpy(pcm_data.copy()[id:id + 3000]).float()
+        # freq, t, stft = signal.spectrogram(waveform, fs=63333, mode='magnitude',nperseg=10,noverlap=1,nfft = 400)
+        t = stft_data['arr_0'].T
+        stft = torch.from_numpy(t).double()
+        # print(stft.shape)
 
-        hi = highpassfilter();
-        pcm_data = hi.butter_highpass_filter(pcm_data, 2000, 63333) #filter the human speaking noise
-        index_f = 0
-        amplitude = 10000
-        while index_f > 16000 or index_f < 7000:
-            index_f = np.argmax(pcm_data > amplitude)
-            amplitude += 100
-            if amplitude > 30000:
-                break
-        max = np.max(pcm_data[index_f:index_f + 3000])
-        if np.max(pcm_data) != max:
-            print(np.max(pcm_data) )
-        indices = np.where(pcm_data > max - 5000)[0]
-        indices = indices[indices < index_f + 3000]
-        id = np.max(indices)
-        waveform = torch.from_numpy(pcm_data.copy()[id:id + 3000]).float()
-        freq, t, stft = signal.spectrogram(waveform, fs=63333, mode='magnitude',nperseg=10,noverlap=1,nfft = 1000)
-        stft = torch.from_numpy(stft.T.copy()).float()
         # waveform = F.normalize(waveform, p=2.0, dim=0, eps=1e-12, out=None)
         # waveform = waveform.unsqueeze(1)
         # time_index = torch.arange(waveform.shape[0]).unsqueeze(1)
@@ -70,7 +73,7 @@ class PCMDataSet(Dataset):
 
     def get_label(self, file):
         match file.split('_')[-1]:
-            # case "5.pcm":
+            # case "5.npz":
             #     return torch.Tensor([1,0,0,0])
             # case "6.pcm":
             #     return torch.Tensor([0,1,0,0])
@@ -78,43 +81,43 @@ class PCMDataSet(Dataset):
             #     return torch.Tensor([0,0,1,0])
             # case "8.pcm":
             #     return torch.Tensor([0,0,0,1])
-            case "1.pcm":
+            case "1.npz":
                 return torch.Tensor([0.7, 0.2, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "2.pcm":
+            case "2.npz":
                 return torch.Tensor([0.2, 0.6, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "3.pcm":
+            case "3.npz":
                 return torch.Tensor([0.05, 0.1, 0.6, 0, 0, 0, 0.1, 0.05, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "4.pcm":
+            case "4.npz":
                 return torch.Tensor([0, 0, 0, 0.8, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "5.pcm":
+            case "5.npz":
                 return torch.Tensor([0, 0, 0, 0.1, 0.8, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "6.pcm":
+            case "6.npz":
                 return torch.Tensor([0, 0, 0, 0.1, 0.1, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "7.pcm":
+            case "7.npz":
                 return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.7, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "8.pcm":
+            case "8.npz":
                 return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.1, 0.7, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "9.pcm":
+            case "9.npz":
                 return torch.Tensor([0, 0, 0.1, 0, 0, 0, 0.1, 0.1, 0.7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "10.pcm":
+            case "10.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "11.pcm":
+            case "11.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.2, 0, 0, 0, 0, 0, 0, 0, 0])
-            case "12.pcm":
+            case "12.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.7, 0.15, 0, 0, 0, 0, 0, 0, 0])
-            case "13.pcm":
+            case "13.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.7, 0.15, 0, 0, 0, 0, 0, 0])
-            case "14.pcm":
+            case "14.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.15, 0.6, 0.15, 0, 0, 0, 0, 0])
-            case "15.pcm":
+            case "15.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.6, 0.2, 0, 0, 0, 0])
-            case "16.pcm":
+            case "16.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.2, 0.7, 0, 0, 0, 0])
-            case "17.pcm":
+            case "17.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0.2, 0])
-            case "18.pcm":
+            case "18.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0.7, 0.2, 0])
-            case "19.pcm":
+            case "19.npz":
                 return torch.Tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.15, 0.15, 0.7, 0])
 
 #
